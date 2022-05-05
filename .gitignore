@@ -9,4 +9,12 @@ demo/img/
 
 *.tar
 
-data/wiki.npz
+*.hdf5
+
+*.h5
+
+*.json
+
+*.npz
+
+*.png
