@@ -2,13 +2,13 @@ import pandas as pd
 import logging
 import argparse
 import os
-from keras.callbacks import ModelCheckpoint
-from tensorflow.keras.optimizers import  Adam
-from SSRNET_model import SSR_net
-from TYY_utils import mk_dir, load_data_npz
 import numpy as np
-import TYY_callbacks
-from TYY_generators import *
+from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.optimizers import Adam
+from ssrnet.SSRNET_model import SSR_net
+from ssrnet.train.TYY_utils import mk_dir, load_data_npz
+import ssrnet.train.TYY_callbacks as TYY_callbacks
+from ssrnet.train.TYY_generators import *
 from keras.utils.vis_utils import plot_model
 from moviepy.editor import *
 
