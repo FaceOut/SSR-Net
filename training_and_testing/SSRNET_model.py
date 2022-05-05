@@ -2,15 +2,10 @@ import logging
 import sys
 import numpy as np
 from keras.models import Model
-from keras.layers import Input, Activation, add, Dense, Flatten, Dropout, Multiply, Embedding, Lambda, Add, Concatenate, Activation
+from keras.layers import Input, Activation, Dense, Flatten, Dropout, Multiply, Lambda, Activation
 from keras.layers.convolutional import Conv2D, AveragePooling2D, MaxPooling2D
-from keras.layers.normalization import BatchNormalization
-from keras.regularizers import l2
+from keras.layers import BatchNormalization
 from keras import backend as K
-from keras.optimizers import SGD,Adam
-from keras.utils import plot_model
-from keras.engine.topology import Layer
-from keras import activations, initializers, regularizers, constraints
 
 sys.setrecursionlimit(2 ** 20)
 np.random.seed(2 ** 10)
@@ -19,12 +14,12 @@ np.random.seed(2 ** 10)
 class SSR_net:
     def __init__(self, image_size,stage_num,lambda_local,lambda_d):
         
-        if K.image_dim_ordering() == "th":
-            logging.debug("image_dim_ordering = 'th'")
+        if K.image_data_format() == "channels_first":
+            logging.debug("image_dim_ordering = 'channels_first'")
             self._channel_axis = 1
             self._input_shape = (3, image_size, image_size)
         else:
-            logging.debug("image_dim_ordering = 'tf'")
+            logging.debug("image_dim_ordering = 'channels_last'")
             self._channel_axis = -1
             self._input_shape = (image_size, image_size, 3)
 

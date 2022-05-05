@@ -2,24 +2,18 @@ import pandas as pd
 import logging
 import argparse
 import os
-from keras.callbacks import LearningRateScheduler, ModelCheckpoint
-from keras.optimizers import SGD, Adam
-from keras.utils import np_utils
+from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.optimizers import  Adam
 from SSRNET_model import SSR_net
 from TYY_utils import mk_dir, load_data_npz
-import sys
 import numpy as np
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.mobilenet import MobileNet
 import TYY_callbacks
-from keras.preprocessing.image import ImageDataGenerator
 from TYY_generators import *
-from keras.utils import plot_model
+from keras.utils.vis_utils import plot_model
 from moviepy.editor import *
-import cv2
+
+
 logging.basicConfig(level=logging.DEBUG)
-
-
 
 
 def get_args():
