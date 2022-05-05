@@ -2,15 +2,10 @@ import logging
 import sys
 import numpy as np
 from keras.models import Model
-from keras.layers import Input, Activation, add, Dense, Flatten, Dropout, Multiply, Embedding, Lambda, Add, Concatenate, Activation
+from keras.layers import Input, Activation, Dense, Flatten, Dropout, Multiply, Lambda, Activation
 from keras.layers.convolutional import Conv2D, AveragePooling2D, MaxPooling2D
 from keras.layers import BatchNormalization
-from keras.regularizers import l2
 from keras import backend as K
-from tensorflow.keras.optimizers import SGD,Adam
-from tensorflow.keras.utils import plot_model
-from tensorflow.keras.layers import Layer
-from keras import activations, initializers, regularizers, constraints
 
 sys.setrecursionlimit(2 ** 20)
 np.random.seed(2 ** 10)
