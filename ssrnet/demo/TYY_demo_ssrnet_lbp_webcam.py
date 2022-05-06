@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import argparse
-from SSRNET_model import SSR_net, SSR_net_general
+from ssrnet.SSRNET_model import SSR_net, SSR_net_general
 import sys
 import timeit
 from moviepy.editor import *

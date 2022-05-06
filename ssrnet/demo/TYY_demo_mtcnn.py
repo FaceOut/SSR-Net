@@ -1,9 +1,8 @@
 import os
 import cv2
-import dlib
 import numpy as np
 import argparse
-from SSRNET_model import SSR_net
+from ssrnet.model import SSR_net
 import sys
 import timeit
 from moviepy.editor import *

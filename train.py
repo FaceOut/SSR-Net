@@ -2,24 +2,18 @@ import pandas as pd
 import logging
 import argparse
 import os
-from keras.callbacks import LearningRateScheduler, ModelCheckpoint
-from keras.optimizers import SGD, Adam
-from keras.utils import np_utils
-from SSRNET_model import SSR_net
-from TYY_utils import mk_dir, load_data_npz
-import sys
 import numpy as np
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.mobilenet import MobileNet
-import TYY_callbacks
-from keras.preprocessing.image import ImageDataGenerator
-from TYY_generators import *
-from keras.utils import plot_model
+from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.optimizers import Adam
+from ssrnet.model import SSRNet
+from ssrnet.train.TYY_utils import mk_dir, load_data_npz
+import ssrnet.train.TYY_callbacks as TYY_callbacks
+from ssrnet.train.TYY_generators import *
+from keras.utils.vis_utils import plot_model
 from moviepy.editor import *
-import cv2
+
+
 logging.basicConfig(level=logging.DEBUG)
-
-
 
 
 def get_args():
@@ -69,7 +63,7 @@ def main():
     lambda_local = 0.25*(netType1%5)
     lambda_d = 0.25*(netType2%5)
 
-    model = SSR_net(image_size,stage_num, lambda_local, lambda_d)()
+    model = SSRNet(image_size,stage_num, lambda_local, lambda_d)()
     save_name = 'ssrnet_%d_%d_%d_%d_%s_%s' % (stage_num[0],stage_num[1],stage_num[2], image_size, lambda_local, lambda_d)
     model.compile(optimizer=optMethod, loss=["mae"], metrics={'pred_a':'mae'})
 

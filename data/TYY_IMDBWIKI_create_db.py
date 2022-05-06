@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import cv2
 import scipy.io
@@ -29,7 +30,7 @@ def main():
     img_size = args.img_size
     min_score = args.min_score
 
-    root_path = "./{}_crop/".format(db)
+    root_path = "./{}_crop_if/".format(db)
     mat_path = root_path + "{}.mat".format(db)
     full_path, dob, gender, photo_taken, face_score, second_face_score, age = get_meta(mat_path, db)
 
@@ -38,6 +39,8 @@ def main():
     out_imgs = []
 
     for i in tqdm(range(len(face_score))):
+        if not os.path.isfile(root_path + str(full_path[i][0])):
+            continue
         if face_score[i] < min_score:
             continue
 
@@ -53,6 +56,8 @@ def main():
         out_genders.append(int(gender[i]))
         out_ages.append(age[i])
         img = cv2.imread(root_path + str(full_path[i][0]))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (img_size, img_size))
         out_imgs.append(cv2.resize(img, (img_size, img_size)))
 
     np.savez(output_path,image=np.array(out_imgs), gender=np.array(out_genders), age=np.array(out_ages), img_size=img_size)

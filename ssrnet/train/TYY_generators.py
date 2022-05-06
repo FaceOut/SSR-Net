@@ -1,39 +1,18 @@
-import keras
+import cv2
 import numpy as np
-import sys
-from scipy import misc
-import tensorflow as tf
 
-
-def random_crop(x,dn):
-    dx = np.random.randint(dn,size=1)[0]
-    dy = np.random.randint(dn,size=1)[0]
-    w = x.shape[0]
-    h = x.shape[1]
-    out = x[0+dx:w-(dn-dx),0+dy:h-(dn-dy),:]
-    out = misc.imresize(out, (w,h), interp='nearest')
-    return out
+def grayscale(image):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    return image
 
 def augment_data(images):
     for i in range(0,images.shape[0]):
-
         if np.random.random() > 0.5:
             images[i] = images[i][:,::-1]
-        """
-        if np.random.random() > 0.5:
-            images[i] = random_crop(images[i],4)
-        """
-        if np.random.random() > 0.75:
-            images[i] = tf.contrib.keras.preprocessing.image.random_rotation(images[i], 20, row_axis=0, col_axis=1, channel_axis=2)
-        if np.random.random() > 0.75:
-            images[i] = tf.contrib.keras.preprocessing.image.random_shear(images[i], 0.2, row_axis=0, col_axis=1, channel_axis=2)
-        if np.random.random() > 0.75:
-            images[i] = tf.contrib.keras.preprocessing.image.random_shift(images[i], 0.2, 0.2, row_axis=0, col_axis=1, channel_axis=2)
-        if np.random.random() > 0.75:
-            images[i] = tf.contrib.keras.preprocessing.image.random_zoom(images[i], [0.8,1.2], row_axis=0, col_axis=1, channel_axis=2)
-        
+        if np.random.random() > 0.8:
+            images[i] = grayscale(images[i])
     return images
-
 
 def data_generator_reg(X,Y,batch_size):
 
