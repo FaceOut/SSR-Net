@@ -1,14 +1,15 @@
 import pandas as pd
 import logging
 import argparse
-import os
+import os.path as osp
 import numpy as np
+import tensorflow as tf
 from keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from ssrnet.model import SSRNet
-from ssrnet.train.TYY_utils import mk_dir, load_data_npz
-import ssrnet.train.TYY_callbacks as TYY_callbacks
-from ssrnet.train.TYY_generators import *
+from ssrnet.train.utils import makedirs, load_data_npz
+from ssrnet.train.callbacks import DecayLearningRate
+from ssrnet.train.generator import data_generator
 from keras.utils.vis_utils import plot_model
 from moviepy.editor import *
 
@@ -23,6 +24,8 @@ def get_args():
                         help="path to input database npz file")
     parser.add_argument("--db", type=str, required=True,
                         help="database name")
+    parser.add_argument("--pretrained", type=str, default=None,
+                        help="pretrained weights")
     parser.add_argument("--batch_size", type=int, default=128,
                         help="batch size")
     parser.add_argument("--nb_epochs", type=int, default=90,
@@ -43,6 +46,7 @@ def main():
     args = get_args()
     input_path = args.input
     db_name = args.db
+    pretrained = args.pretrained
     batch_size = args.batch_size
     nb_epochs = args.nb_epochs
     validation_split = args.validation_split
@@ -63,45 +67,42 @@ def main():
     lambda_local = 0.25*(netType1%5)
     lambda_d = 0.25*(netType2%5)
 
-    model = SSRNet(image_size,stage_num, lambda_local, lambda_d)()
-    save_name = 'ssrnet_%d_%d_%d_%d_%s_%s' % (stage_num[0],stage_num[1],stage_num[2], image_size, lambda_local, lambda_d)
+    model = SSRNet(image_size, stage_num, lambda_local, lambda_d)()
+    save_name = f'ssrnet_{stage_num[0]}_{stage_num[1]}_{stage_num[2]}_{image_size}_{lambda_local}_{lambda_d}'
     model.compile(optimizer=optMethod, loss=["mae"], metrics={'pred_a':'mae'})
 
-    if db_name == "wiki":
-        weight_file = "imdb_models/"+save_name+"/"+save_name+".h5"
-        model.load_weights(weight_file)
-    elif db_name == "morph": 
-        weight_file = "wiki_models/"+save_name+"/"+save_name+".h5"
-        model.load_weights(weight_file) 
-
+    if pretrained is not None:
+        model.load_weights(pretrained)
     
     logging.debug("Model summary...")
     model.count_params()
     model.summary()
 
     logging.debug("Saving model...")
-    mk_dir(db_name+"_models")
-    mk_dir(db_name+"_models/"+save_name)
-    mk_dir(db_name+"_checkpoints")
-    plot_model(model, to_file=db_name+"_models/"+save_name+"/"+save_name+".png")
+    chkpt_path = osp.join(db_name, "checkpoints", save_name)
+    model_path = osp.join(db_name, "models", save_name)
+    log_path = osp.join(db_name, "logs", save_name)
 
-    with open(os.path.join(db_name+"_models/"+save_name, save_name+'.json'), "w") as f:
-        f.write(model.to_json())
-
+    makedirs(model_path)
+    makedirs(chkpt_path)
+    makedirs(log_path)
     
-    decaylearningrate = TYY_callbacks.DecayLearningRate(start_decay_epoch)
+    plot_model(model, to_file=osp.join(model_path, save_name+".png"))
 
-    callbacks = [ModelCheckpoint(db_name+"_checkpoints/weights.{epoch:02d}-{val_loss:.2f}.hdf5",
+    with open(osp.join(model_path, save_name+'.json'), "w") as f:
+        f.write(model.to_json())
+    
+    decaylearningrate = DecayLearningRate(start_decay_epoch)
+
+    callbacks = [ModelCheckpoint(osp.join(chkpt_path, 'weights.{epoch:02d}-{val_loss:.2f}.hdf5'),
                                  monitor="val_loss",
                                  verbose=1,
                                  save_best_only=True,
-                                 mode="auto"), decaylearningrate
-                        ]
+                                 mode="auto"), decaylearningrate,
+                tf.keras.callbacks.TensorBoard(log_dir=log_path, histogram_freq=1)
+                ]
 
     logging.debug("Running training...")
-    
-
-
     data_num = len(x_data)
     indexes = np.arange(data_num)
     np.random.shuffle(indexes)
@@ -115,16 +116,15 @@ def main():
     y_test_a = y_data_a[train_num:]
 
 
-    hist = model.fit_generator(generator=data_generator_reg(X=x_train, Y=y_train_a, batch_size=batch_size),
+    hist = model.fit(x=data_generator(X=x_train, Y=y_train_a, batch_size=batch_size),
                                    steps_per_epoch=train_num // batch_size,
                                    validation_data=(x_test, [y_test_a]),
                                    epochs=nb_epochs, verbose=1,
                                    callbacks=callbacks)
 
     logging.debug("Saving weights...")
-    model.save_weights(os.path.join(db_name+"_models/"+save_name, save_name+'.h5'), overwrite=True)
-    pd.DataFrame(hist.history).to_hdf(os.path.join(db_name+"_models/"+save_name, 'history_'+save_name+'.h5'), "history")
-
+    model.save_weights(osp.join(model_path, save_name+'.h5'), overwrite=True)
+    pd.DataFrame(hist.history).to_hdf(osp.join(model_path, 'history_'+save_name+'.h5'), "history")
 
 if __name__ == '__main__':
     main()

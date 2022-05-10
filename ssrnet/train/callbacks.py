@@ -24,7 +24,7 @@ class DecayLearningRate(keras.callbacks.Callback):
 			else:
 				ratio = 0.1
 			LR = K.get_value(self.model.optimizer.lr)
-			K.set_value(self.model.optimizer.lr,LR*ratio)
+			K.set_value(self.model.optimizer.lr, LR*ratio)
 		return
 
 	def on_epoch_end(self, epoch, logs={}):

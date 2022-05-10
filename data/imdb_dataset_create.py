@@ -4,7 +4,7 @@ import cv2
 import scipy.io
 import argparse
 from tqdm import tqdm
-from TYY_utils import get_meta
+from utils import get_meta
 
 
 def get_args():

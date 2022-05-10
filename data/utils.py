@@ -1,6 +1,5 @@
 from scipy.io import loadmat
 from datetime import datetime
-import os
 import numpy as np
 
 def calc_age(taken, dob):
@@ -11,7 +10,6 @@ def calc_age(taken, dob):
         return taken - birth.year
     else:
         return taken - birth.year - 1
-
 
 def get_meta(mat_path, db):
     meta = loadmat(mat_path)
@@ -24,20 +22,3 @@ def get_meta(mat_path, db):
     age = [calc_age(photo_taken[i], dob[i]) for i in range(len(dob))]
 
     return full_path, dob, gender, photo_taken, face_score, second_face_score, age
-
-
-def load_data(mat_path):
-    d = loadmat(mat_path)
-
-    return d["image"], d["gender"][0], d["age"][0], d["db"][0], d["img_size"][0, 0], d["min_score"][0, 0]
-
-def load_data_npz(npz_path):
-    d = np.load(npz_path)
-
-    return d["image"], d["gender"], d["age"], d["img_size"]
-
-def mk_dir(dir):
-    try:
-        os.mkdir( dir )
-    except OSError:
-        pass
